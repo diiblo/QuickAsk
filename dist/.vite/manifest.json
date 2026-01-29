@@ -1,0 +1,52 @@
+{
+  "../../../../@crx/manifest": {
+    "file": "assets/crx-manifest.js-BydJREAj.js",
+    "name": "crx-manifest.js",
+    "src": "../../../../@crx/manifest",
+    "isEntry": true
+  },
+  "_createLucideIcon-BoOscrNW.js": {
+    "file": "assets/createLucideIcon-BoOscrNW.js",
+    "name": "createLucideIcon"
+  },
+  "_storage-VuSdagKx.js": {
+    "file": "assets/storage-VuSdagKx.js",
+    "name": "storage"
+  },
+  "index.tsx-loader.js": {
+    "file": "assets/index.tsx-loader-DNdzi289.js",
+    "src": "index.tsx-loader.js"
+  },
+  "src/background/index.ts": {
+    "file": "assets/index.ts-BWOPFlND.js",
+    "name": "index.ts",
+    "src": "src/background/index.ts",
+    "isEntry": true,
+    "imports": [
+      "_storage-VuSdagKx.js"
+    ]
+  },
+  "src/content/index.tsx": {
+    "file": "assets/index.tsx-eTwcFmFo.js",
+    "name": "index.tsx",
+    "src": "src/content/index.tsx",
+    "isEntry": true,
+    "imports": [
+      "_createLucideIcon-BoOscrNW.js",
+      "_storage-VuSdagKx.js"
+    ]
+  },
+  "src/options/index.html": {
+    "file": "assets/index.html-CdtDb-W3.js",
+    "name": "index.html",
+    "src": "src/options/index.html",
+    "isEntry": true,
+    "imports": [
+      "_createLucideIcon-BoOscrNW.js",
+      "_storage-VuSdagKx.js"
+    ],
+    "css": [
+      "assets/index-D6o6L91T.css"
+    ]
+  }
+}
