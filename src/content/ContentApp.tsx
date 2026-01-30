@@ -1,18 +1,22 @@
 import { useEffect, useState } from 'react';
 import { Sparkles, Loader2, X } from 'lucide-react';
-import { getSettings } from '../utils/storage';
+import { getSettings, AppSettings } from '../utils/storage';
+import { InputManager } from './InputManager';
 
 // Logic to traverse object by path or key
 const findBlockValue = (obj: any, key: string): string | null => {
     if (typeof obj !== 'object' || obj === null) return null;
 
-    let value: any = null;
+    // 1. Direct match
+    if (key in obj && typeof obj[key] === 'string') {
+        return obj[key];
+    }
 
-    if (key in obj) {
-        value = obj[key];
-    } else if (key.includes('_') || key.includes('.')) {
-        // Try dot notation
-        const parts = key.split(/[_.]/);
+    // 2. Nested match with underscore [BLOCK_KEY] -> obj[BLOCK][KEY]
+    if (key.includes('_')) {
+        const parts = key.split('_');
+        // We only support 1 level of nesting for now as per spec [CV_CV1]
+        // But let's be generic: iterate parts
         let current = obj;
         for (const part of parts) {
             if (current && typeof current === 'object' && part in current) {
@@ -22,20 +26,12 @@ const findBlockValue = (obj: any, key: string): string | null => {
                 break;
             }
         }
-        value = current;
+        if (typeof current === 'string') return current;
     }
 
-    if (typeof value === 'string') return value;
-
-    // If it is an object, look for "PROMPT" key (convention)
-    if (value && typeof value === 'object' && 'PROMPT' in value && typeof value['PROMPT'] === 'string') {
-        return value['PROMPT'];
-    }
-
-    // Fallback: If object but no PROMPT, maybe stringify it? 
-    // Or just return null to ignore it. 
-    // Given the user example, "aa": { "PROMPT": "..." } -> [aa] -> "..."
-    // We should definitely prioritize the logic above.
+    // 3. Fallback: If it's an object, do we return something? 
+    // Spec says: [LM] -> "Lettre..." (string). [CV] -> {CV1...}. 
+    // If user types [CV], we probably can't replace it with an object.
 
     return null;
 };
@@ -52,24 +48,40 @@ export const ContentApp = () => {
     const [activeElement, setActiveElement] = useState<HTMLElement | null>(null);
     const [position, setPosition] = useState({ top: 0, left: 0 });
     const [loading, setLoading] = useState(false);
-
     const [error, setError] = useState<string | null>(null);
+    const [settings, setSettings] = useState<AppSettings | null>(null);
 
+    // Initial settings load
+    useEffect(() => {
+        getSettings().then(setSettings);
+    }, []);
+
+    // Listen for focus events
     useEffect(() => {
         const handleFocus = (e: Event) => {
             const target = e.target as HTMLElement;
-            if (target.matches('input[type="text"], input[type="search"], textarea, [contenteditable="true"]')) {
+            // Use InputManager and Custom Selectors
+            const customSelectors = settings?.customSelectors || [];
+            if (InputManager.isValidTarget(target, customSelectors)) {
                 updatePosition(target);
                 setActiveElement(target);
                 setError(null);
             }
         };
 
+        // Also listen for clicks/interactions that might change focus but isn't a standard focus event
+        // (common in complex SPA editors like LinkedIn where focus stays on a container)
+        // Note: 'focusin' generally bubbles and catches most things.
+
         const handleScroll = () => {
             if (activeElement) updatePosition(activeElement);
         };
 
         document.addEventListener('focusin', handleFocus);
+        // Checking for 'data-artdeco-is-focused' mutation might be overkill if focusin works, 
+        // but for LinkedIn sometimes focus is managed virtually. 
+        // Let's stick to focusin for now, it usually fires for contenteditable.
+
         window.addEventListener('resize', handleScroll);
         window.addEventListener('scroll', handleScroll, true);
 
@@ -78,29 +90,28 @@ export const ContentApp = () => {
             window.removeEventListener('resize', handleScroll);
             window.removeEventListener('scroll', handleScroll, true);
         };
-    }, [activeElement]);
+    }, [activeElement, settings]);
 
     const updatePosition = (target: HTMLElement) => {
         const rect = target.getBoundingClientRect();
         const scrollTop = window.scrollY || document.documentElement.scrollTop;
         const scrollLeft = window.scrollX || document.documentElement.scrollLeft;
 
-        // Position at top right inside the input
+        // Check if it's the specific LinkedIn structure to position better?
+        // Usually top-right relative to the container is fine.
+
         setPosition({
             top: rect.top + scrollTop + 8,
-            left: rect.right + scrollLeft - 32 // 32px from right
+            left: rect.right + scrollLeft - 40
+            // Moved a bit more to left to avoid scrollbars
         });
     };
 
     const handleAskAI = async () => {
-        if (!activeElement) return;
+        if (!activeElement || !settings) return;
 
-        let text = '';
-        if (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA') {
-            text = (activeElement as HTMLInputElement | HTMLTextAreaElement).value;
-        } else {
-            text = activeElement.innerText;
-        }
+        // Use InputManager to get text
+        const text = InputManager.getValue(activeElement);
 
         if (!text.trim()) return;
 
@@ -108,8 +119,10 @@ export const ContentApp = () => {
         setError(null);
 
         try {
-            const settings = await getSettings();
-            const expandedPrompt = expandPrompts(text, settings.prompts);
+            // Re-fetch settings closely to ensure fresh prompts? 
+            // Or rely on state. State is fine for now but syncing might be safer.
+            const freshSettings = await getSettings();
+            const expandedPrompt = expandPrompts(text, freshSettings.prompts);
 
             console.log('Sending prompt:', expandedPrompt);
 
@@ -121,7 +134,8 @@ export const ContentApp = () => {
                 }
 
                 if (response && response.success) {
-                    insertText(response.text);
+                    // Use InputManager to set text
+                    InputManager.setValue(activeElement, response.text);
                 } else {
                     setError(response?.error || 'Unknown error from AI');
                 }
@@ -130,36 +144,6 @@ export const ContentApp = () => {
         } catch (err: any) {
             setLoading(false);
             setError(err.message);
-        }
-    };
-
-    const insertText = (text: string) => {
-        if (!activeElement) return;
-
-        // Focus element again if lost
-        activeElement.focus();
-
-        // Native setter hack for React/Frameworks
-        const prototype = Object.getPrototypeOf(activeElement);
-        const nativeValueSetter = Object.getOwnPropertyDescriptor(prototype, 'value')?.set;
-
-        if (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA') {
-            const input = activeElement as HTMLInputElement;
-
-            // Clear and set
-            // The request said "préalablement vidé", so strictly replace.
-            if (nativeValueSetter) {
-                nativeValueSetter.call(input, text);
-            } else {
-                input.value = text;
-            }
-
-            // Dispatch events
-            input.dispatchEvent(new Event('input', { bubbles: true }));
-            input.dispatchEvent(new Event('change', { bubbles: true }));
-        } else {
-            // contenteditable
-            activeElement.innerText = text;
         }
     };
 

@@ -11,12 +11,16 @@ export const callAI = async (provider: AIProvider, prompt: string): Promise<AIRe
     }
 
     try {
-        if (provider.id === 'ollama') {
+        const id = provider.id.toLowerCase();
+        const url = provider.baseUrl.toLowerCase();
+
+        // Detect strategy
+        if (id === 'ollama' || url.includes('localhost:11434') || url.includes('ollama')) {
             return callOllama(provider, prompt);
-        } else if (provider.id === 'gemini') {
+        } else if (id === 'gemini' || url.includes('googleapis.com')) {
             return callGemini(provider, prompt);
         } else {
-            // Assume OpenAI compatible for everything else for now (OpenAI, DeepSeek, OpenRouter, Groq, etc.)
+            // Default to OpenAI compatible for everything else (OpenAI, DeepSeek, OpenRouter, Groq, etc.)
             return callOpenAICompatible(provider, prompt);
         }
     } catch (error: any) {

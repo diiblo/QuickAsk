@@ -1,6 +1,6 @@
 {
   "../../../../@crx/manifest": {
-    "file": "assets/crx-manifest.js-BydJREAj.js",
+    "file": "assets/crx-manifest.js-BBjImWNZ.js",
     "name": "crx-manifest.js",
     "src": "../../../../@crx/manifest",
     "isEntry": true
@@ -9,44 +9,44 @@
     "file": "assets/createLucideIcon-BoOscrNW.js",
     "name": "createLucideIcon"
   },
-  "_storage-nc2VcnAQ.js": {
-    "file": "assets/storage-nc2VcnAQ.js",
+  "_storage-Dgsjhkqx.js": {
+    "file": "assets/storage-Dgsjhkqx.js",
     "name": "storage"
   },
   "index.tsx-loader.js": {
-    "file": "assets/index.tsx-loader-DmGGfVtU.js",
+    "file": "assets/index.tsx-loader-BwGvnYZ2.js",
     "src": "index.tsx-loader.js"
   },
   "src/background/index.ts": {
-    "file": "assets/index.ts-DhMzTIPH.js",
+    "file": "assets/index.ts-BYL3FwR7.js",
     "name": "index.ts",
     "src": "src/background/index.ts",
     "isEntry": true,
     "imports": [
-      "_storage-nc2VcnAQ.js"
+      "_storage-Dgsjhkqx.js"
     ]
   },
   "src/content/index.tsx": {
-    "file": "assets/index.tsx-CTdn7AZt.js",
+    "file": "assets/index.tsx-DXY9E-5b.js",
     "name": "index.tsx",
     "src": "src/content/index.tsx",
     "isEntry": true,
     "imports": [
       "_createLucideIcon-BoOscrNW.js",
-      "_storage-nc2VcnAQ.js"
+      "_storage-Dgsjhkqx.js"
     ]
   },
   "src/options/index.html": {
-    "file": "assets/index.html-w3F4mCkL.js",
+    "file": "assets/index.html-DevCw1gH.js",
     "name": "index.html",
     "src": "src/options/index.html",
     "isEntry": true,
     "imports": [
       "_createLucideIcon-BoOscrNW.js",
-      "_storage-nc2VcnAQ.js"
+      "_storage-Dgsjhkqx.js"
     ],
     "css": [
-      "assets/index-DbPP1pTj.css"
+      "assets/index-BkF3IVXE.css"
     ]
   }
 }
