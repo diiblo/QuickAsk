@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "QuickAsk - AI Assistant",
-  "version": "2.0.0",
+  "version": "1.0.0",
   "description": "Interact with input fields and send prompts to AI APIs (Ollama, ChatGPT, Claude, etc.).",
   "permissions": [
     "storage",
@@ -18,25 +18,31 @@
   },
   "content_scripts": [
     {
-      "js": [
-        "assets/index.tsx-loader-BwGvnYZ2.js"
-      ],
       "matches": [
         "<all_urls>"
+      ],
+      "js": [
+        "src/content/index.tsx-loader.js"
       ],
       "run_at": "document_end"
     }
   ],
   "web_accessible_resources": [
     {
+      "resources": [
+        "assets/*"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
+    },
+    {
       "matches": [
         "<all_urls>"
       ],
       "resources": [
-        "assets/*",
-        "assets/createLucideIcon-BoOscrNW.js",
-        "assets/storage-Dgsjhkqx.js",
-        "assets/index.tsx-DXY9E-5b.js"
+        "**/*",
+        "*"
       ],
       "use_dynamic_url": false
     }

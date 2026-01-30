@@ -65,23 +65,54 @@ export class InputManager {
             return;
         }
 
-        // 2. ContentEditable (Generic + LinkedIn)
+        // 2. ContentEditable (Generic + LinkedIn + WhatsApp)
         if (element.getAttribute('contenteditable') === 'true') {
+            // Challenge: Complex editors (Lexical, Draft.js, Monaco) rely on internal state.
+            // Direct innerText manipulation often breaks them or gets reverted.
+            // Best approach: Simulate user input via execCommand.
+
+            try {
+                element.focus();
+
+                // Select all content to replace it
+                const selection = window.getSelection();
+                const range = document.createRange();
+                range.selectNodeContents(element);
+
+                if (selection) {
+                    selection.removeAllRanges();
+                    selection.addRange(range);
+
+                    // This is deprecated but implies "native user typed this"
+                    // It handles undo stack, dirty state, and events for us.
+                    const success = document.execCommand('insertText', false, text);
+
+                    // If successful, we are done.
+                    if (success) return;
+                }
+            } catch (err) {
+                console.warn('[InputManager] execCommand failed:', err);
+            }
+
+            // Fallback: Manual DOM manipulation
+            // This is "brittle" for complex editors but works for simple contenteditables
+
             // LinkedIn specific: Write inside the <p> if it exists
             const innerP = element.querySelector('p');
 
             if (innerP) {
-                innerP.innerText = text;
+                // Lexical (WhatsApp, Facebook) often nests text in a span inside p
+                const lexicalSpan = innerP.querySelector('span[data-lexical-text="true"]');
+                if (lexicalSpan) {
+                    (lexicalSpan as HTMLElement).innerText = text;
+                } else {
+                    innerP.innerText = text;
+                }
             } else {
-                // Determine if we should create a p tag? 
-                // LinkedIn usually starts with one. If it's empty, it might be just <br> or empty.
-                // Safest is to just set innerText of the parent if no P exists, 
-                // OR check if we are on LinkedIn and force a P? 
-                // For now, let's stick to simple replacement.
                 element.innerText = text;
             }
 
-            // Trigger input event for listeners
+            // Trigger input event for listeners as a backup
             element.dispatchEvent(new Event('input', { bubbles: true }));
         }
     }
