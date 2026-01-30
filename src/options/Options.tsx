@@ -159,6 +159,12 @@ export default function Options() {
                                                 </div>
                                             </div>
                                         )}
+                                        {provider.id === 'ollama' && (
+                                            <div className="mt-2 text-xs text-amber-700 bg-amber-50 p-2 rounded">
+                                                <p><strong>Localhost Issues?</strong> If you see "Forbidden (403)", stop Ollama and run:</p>
+                                                <code className="block mt-1 bg-amber-100 p-1 rounded">OLLAMA_ORIGINS="*" ollama serve</code>
+                                            </div>
+                                        )}
                                     </div>
                                 ))}
                             </div>

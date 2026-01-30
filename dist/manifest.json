@@ -19,7 +19,7 @@
   "content_scripts": [
     {
       "js": [
-        "assets/index.tsx-loader-BFYeiRYy.js"
+        "assets/index.tsx-loader-DmGGfVtU.js"
       ],
       "matches": [
         "<all_urls>"
@@ -35,8 +35,8 @@
       "resources": [
         "assets/*",
         "assets/createLucideIcon-BoOscrNW.js",
-        "assets/storage-VuSdagKx.js",
-        "assets/index.tsx-6wazXgKv.js"
+        "assets/storage-nc2VcnAQ.js",
+        "assets/index.tsx-CTdn7AZt.js"
       ],
       "use_dynamic_url": false
     }

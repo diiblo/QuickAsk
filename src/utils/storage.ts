@@ -25,6 +25,10 @@ export const defaultSettings: AppSettings = {
     prompts: {
         "CV": {
             "PROMPT": "Rédige une lettre de motivation..."
+        },
+        "PROMPT": {
+            "amour": "dit moi juste que tu m'aime",
+            "deteste": "dit moi juste que tu me deteste"
         }
     },
 };
