@@ -27,8 +27,13 @@ export const callAI = async (provider: AIProvider, prompt: string): Promise<AIRe
 
 const callOllama = async (provider: AIProvider, prompt: string): Promise<AIResponse> => {
     // Basic cleanup of URL
-    const baseUrl = provider.baseUrl.replace(/\/$/, '');
-    const url = `${baseUrl}/api/generate`;
+    let baseUrl = provider.baseUrl.replace(/\/$/, '');
+
+    // Check if user already included /api/generate
+    if (!baseUrl.endsWith('/api/generate')) {
+        baseUrl = `${baseUrl}/api/generate`;
+    }
+    const url = baseUrl;
 
     const headers: Record<string, string> = {
         'Content-Type': 'application/json',

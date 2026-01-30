@@ -6,22 +6,36 @@ import { getSettings } from '../utils/storage';
 const findBlockValue = (obj: any, key: string): string | null => {
     if (typeof obj !== 'object' || obj === null) return null;
 
-    if (key in obj && typeof obj[key] === 'string') return obj[key];
+    let value: any = null;
 
-    // Try dot notation
-    if (key.includes('_') || key.includes('.')) {
-        // split by _ or .
+    if (key in obj) {
+        value = obj[key];
+    } else if (key.includes('_') || key.includes('.')) {
+        // Try dot notation
         const parts = key.split(/[_.]/);
         let current = obj;
         for (const part of parts) {
             if (current && typeof current === 'object' && part in current) {
                 current = current[part];
             } else {
-                return null;
+                current = null;
+                break;
             }
         }
-        if (typeof current === 'string') return current;
+        value = current;
     }
+
+    if (typeof value === 'string') return value;
+
+    // If it is an object, look for "PROMPT" key (convention)
+    if (value && typeof value === 'object' && 'PROMPT' in value && typeof value['PROMPT'] === 'string') {
+        return value['PROMPT'];
+    }
+
+    // Fallback: If object but no PROMPT, maybe stringify it? 
+    // Or just return null to ignore it. 
+    // Given the user example, "aa": { "PROMPT": "..." } -> [aa] -> "..."
+    // We should definitely prioritize the logic above.
 
     return null;
 };

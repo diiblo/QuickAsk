@@ -14,11 +14,11 @@
     "name": "storage"
   },
   "index.tsx-loader.js": {
-    "file": "assets/index.tsx-loader-D-_SmfzD.js",
+    "file": "assets/index.tsx-loader-BFYeiRYy.js",
     "src": "index.tsx-loader.js"
   },
   "src/background/index.ts": {
-    "file": "assets/index.ts-CcAp5Ppg.js",
+    "file": "assets/index.ts-Bnv462oo.js",
     "name": "index.ts",
     "src": "src/background/index.ts",
     "isEntry": true,
@@ -27,7 +27,7 @@
     ]
   },
   "src/content/index.tsx": {
-    "file": "assets/index.tsx-DXFJnIH-.js",
+    "file": "assets/index.tsx-6wazXgKv.js",
     "name": "index.tsx",
     "src": "src/content/index.tsx",
     "isEntry": true,
@@ -37,7 +37,7 @@
     ]
   },
   "src/options/index.html": {
-    "file": "assets/index.html-CTcdqoQ3.js",
+    "file": "assets/index.html-B7Mmso55.js",
     "name": "index.html",
     "src": "src/options/index.html",
     "isEntry": true,

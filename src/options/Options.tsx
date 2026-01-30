@@ -133,13 +133,29 @@ export default function Options() {
                                                 </div>
                                                 <div className="md:col-span-2">
                                                     <label className="block text-sm font-medium text-slate-700 mb-1">Model</label>
-                                                    <input
-                                                        type="text"
-                                                        value={provider.model || ''}
-                                                        onChange={(e) => updateProvider(idx, { model: e.target.value })}
-                                                        className="w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border"
-                                                        placeholder="gpt-4, llama2, ... "
-                                                    />
+                                                    {provider.id === 'gemini' ? (
+                                                        <select
+                                                            value={provider.model || 'gemini-pro'}
+                                                            onChange={(e) => updateProvider(idx, { model: e.target.value })}
+                                                            className="w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border bg-white"
+                                                        >
+                                                            <option value="gemini-pro">Gemini Pro</option>
+                                                            <option value="gemini-1.5-pro-latest">Gemini 1.5 Pro</option>
+                                                            <option value="gemini-1.5-flash-latest">Gemini 1.5 Flash</option>
+                                                            <option value="gemini-3-pro-preview">Gemini 3 Pro Preview (experimental)</option>
+                                                            <option value="gemini-3-flash-preview">Gemini 3 Flash Preview (experimental)</option>
+                                                            <option value="gemini-2.5-flash">Gemini 2.5 Flash (experimental)</option>
+                                                            <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash Lite (experimental)</option>
+                                                        </select>
+                                                    ) : (
+                                                        <input
+                                                            type="text"
+                                                            value={provider.model || ''}
+                                                            onChange={(e) => updateProvider(idx, { model: e.target.value })}
+                                                            className="w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border"
+                                                            placeholder="gpt-4, llama2, ... "
+                                                        />
+                                                    )}
                                                 </div>
                                             </div>
                                         )}
