@@ -30,7 +30,7 @@ export const defaultSettings: AppSettings = {
         "LM": "Lettre de motivation en Latex"
     },
     customSelectors: [],
-    language: 'en'
+    language: 'fr'
 };
 
 export const getSettings = async (): Promise<AppSettings> => {

@@ -3,6 +3,7 @@
     "name": "QuickAsk - AI Assistant",
     "version": "1.0.0",
     "description": "Interact with input fields and send prompts to AI APIs (Ollama, ChatGPT, Claude, etc.).",
+    "author": "King Rahman",
     "permissions": [
         "storage",
         "activeTab",

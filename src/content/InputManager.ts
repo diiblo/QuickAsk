@@ -1,34 +1,31 @@
 /**
- * Helper class to abstract away the differences between:
- * - <input> / <textarea>
- * - Standard <div contenteditable="true">
- * - Complex LinkedIn editors (nested <p> tags)
+ * Classe utilitaire pour gérer les différences complexes entre :
+ * - <input> / <textarea> (Simples)
+ * - <div contenteditable="true"> (Utilisé par Facebook, Gmail, etc.)
+ * - Éditeurs complexes (LinkedIn avec des balises <p> imbriquées)
  */
 export class InputManager {
 
     /**
-     * returns the text content of the element
+     * Récupère le texte actuel de l'élément ciblé.
      */
     static getValue(element: HTMLElement): string {
         if (!element) return '';
 
-        // 1. Standard Input/Textarea
+        // 1. Cas simple : Input ou Textarea standard
         if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
             return (element as HTMLInputElement | HTMLTextAreaElement).value;
         }
 
-        // 2. LinkedIn specific check
-        // LinkedIn uses a contenteditable div that often contains a <p> where the text actually lives.
-        // It sometimes has a placeholder in a data attribute or other structure.
-        // We defer to the inner <p> if it exists and we are in a likely LinkedIn editor.
+        // 2. Cas complexe : Zone éditable (contenteditable)
+        // LinkedIn, par exemple, met le vrai texte dans un paragraphe <p> à l'intérieur de la div.
         if (element.getAttribute('contenteditable') === 'true') {
-            // Check for inner paragraph for LinkedIn editors
             const innerP = element.querySelector('p');
             if (innerP) {
-                // Use innerText of the P tag to avoid getting extra newlines from the div wrapper
+                // On prend le texte du <p> pour éviter les retours à la ligne parasites du conteneur
                 return innerP.innerText;
             }
-            // Fallback to standard contenteditable
+            // Sinon on prend tout le texte brute
             return element.innerText;
         }
 
@@ -36,20 +33,21 @@ export class InputManager {
     }
 
     /**
-     * Sets the text content of the element.
-     * Handles complex events to ensure React/Frameworks pick up the change.
+     * Remplace le texte de l'élément par le nouveau texte.
+     * C'est la partie difficile car React/Angular/Vue peuvent ignorer nos changements simples.
      */
     static setValue(element: HTMLElement, text: string): void {
         if (!element) return;
 
-        // Ensure focus
+        // On s'assure d'avoir le focus pour simuler une frappe
         element.focus();
 
-        // 1. Standard Input/Textarea
+        // 1. Cas simple : Input ou Textarea
         if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
             const input = element as HTMLInputElement | HTMLTextAreaElement;
 
-            // React 16+ hack: standard .value = x won't trigger React onChange
+            // Hack pour React 16+ : Si on fait juste input.value = "..." React ne le "voit" pas.
+            // On doit aller chercher le "setter" natif du prototype HTML.
             const prototype = Object.getPrototypeOf(element);
             const nativeValueSetter = Object.getOwnPropertyDescriptor(prototype, 'value')?.set;
 
@@ -59,22 +57,23 @@ export class InputManager {
                 input.value = text;
             }
 
-            // Dispatch events
+            // On crie à tout le monde que ça a changé
             input.dispatchEvent(new Event('input', { bubbles: true }));
             input.dispatchEvent(new Event('change', { bubbles: true }));
             return;
         }
 
-        // 2. ContentEditable (Generic + LinkedIn + WhatsApp)
+        // 2. Cas complexe : ContentEditable
+        // (Utilisé par les éditeurs riches comme WhatsApp Web, LinkedIn, etc.)
         if (element.getAttribute('contenteditable') === 'true') {
-            // Challenge: Complex editors (Lexical, Draft.js, Monaco) rely on internal state.
-            // Direct innerText manipulation often breaks them or gets reverted.
-            // Best approach: Simulate user input via execCommand.
 
+            // Meilleure méthode : execCommand('insertText')
+            // Ça fait croire au navigateur que l'utilisateur a physiquement tapé ou collé le texte.
+            // C'est vital pour que les sites ne "perdent" pas le texte après coup.
             try {
                 element.focus();
 
-                // Select all content to replace it
+                // On sélectionne tout le texte existant pour l'écraser
                 const selection = window.getSelection();
                 const range = document.createRange();
                 range.selectNodeContents(element);
@@ -83,25 +82,22 @@ export class InputManager {
                     selection.removeAllRanges();
                     selection.addRange(range);
 
-                    // This is deprecated but implies "native user typed this"
-                    // It handles undo stack, dirty state, and events for us.
+                    // La commande magique
                     const success = document.execCommand('insertText', false, text);
 
-                    // If successful, we are done.
-                    if (success) return;
+                    if (success) return; // Si ça a marché, on s'arrête là, c'est parfait.
                 }
             } catch (err) {
-                console.warn('[InputManager] execCommand failed:', err);
+                console.warn('[QuickAsk] execCommand a échoué, passage en mode manuel :', err);
             }
 
-            // Fallback: Manual DOM manipulation
-            // This is "brittle" for complex editors but works for simple contenteditables
+            // Plan B : Manipulation brutale du DOM (Moins fiable mais nécessaire parfois)
 
-            // LinkedIn specific: Write inside the <p> if it exists
+            // Spécifique LinkedIn : On écrit dans le <p>
             const innerP = element.querySelector('p');
 
             if (innerP) {
-                // Lexical (WhatsApp, Facebook) often nests text in a span inside p
+                // Spécifique Lexical (Framework de Facebook/WhatsApp)
                 const lexicalSpan = innerP.querySelector('span[data-lexical-text="true"]');
                 if (lexicalSpan) {
                     (lexicalSpan as HTMLElement).innerText = text;
@@ -112,28 +108,28 @@ export class InputManager {
                 element.innerText = text;
             }
 
-            // Trigger input event for listeners as a backup
+            // On appelle l'événement 'input' au cas où
             element.dispatchEvent(new Event('input', { bubbles: true }));
         }
     }
 
     /**
-     * Checks if an element matches our target criteria (Focusable input-like element)
+     * Détermine si un élément HTML mérite d'avoir le bouton Assistant.
      */
     static isValidTarget(element: HTMLElement, customSelectors: string[] = []): boolean {
         if (!element) return false;
 
-        // Custom selectors from user config
+        // Sélecteurs personnalisés définis par l'utilisateur
         if (customSelectors.some(selector => element.matches(selector))) {
             return true;
         }
 
-        // Standard inputs
+        // Inputs classiques (texte, recherche) et zones de texte
         if (element.matches('input[type="text"], input[type="search"], textarea')) {
             return true;
         }
 
-        // Contenteditable
+        // Zones éditables riches (div contenteditable)
         if (element.getAttribute('contenteditable') === 'true') {
             return true;
         }

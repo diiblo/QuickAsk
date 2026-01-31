@@ -1,102 +1,89 @@
-# QuickAsk - AI Browser Extension
+# QuickAsk - Assistant IA & Blocs de Texte
 
-QuickAsk is a modern Chrome/WebExtension that allows users to prompt AI models directly from any input field using shortcodes (e.g., `[CV]`). It supports multiple AI providers (Ollama, Gemini, OpenAI, etc.) and is built with modularity and extensibility in mind.
+QuickAsk (par **King Rahman**) est une extension Chrome puissante qui transforme la manière dont vous interagissez avec les champs de texte sur le web. Elle combine l'intelligence artificielle (IA) pour générer du contenu et un système de blocs de texte (raccourcis) pour l'automatisation.
 
-## Technical Stack
+## 🚀 Fonctionnalités Principales
 
-- **Framework**: React 18 + TypeScript
-- **Build Tool**: Vite + CRXJS Plugin
-- **Styling**: TailwindCSS
-- **Icons**: Lucide React
-- **Extension API**: Manifest V3
+1.  **Assistant IA Universel** : Rédigez, corrigez ou traduisez du texte dans n'importe quel champ de saisie (Google, LinkedIn, Email, CMS, etc.) en utilisant vos propres clés API (Ollama, OpenAI, Gemini, Claude, etc.).
+2.  **Système "Blocs" (Shortcuts)** : Créez des raccourcis pour insérer instantanément des textes pré-définis. Par exemple, tapez `[CV_CV1]` pour insérer votre CV version Canada.
+3.  **Interface "Ruban" Moderne** : Un bouton discret qui se déploie au survol pour offrir des contrôles rapides sans encombrer l'écran.
+4.  **Mode IA ON/OFF** : Désactivez l'IA pour n'utiliser que les blocs de texte (ultra-rapide, aucune requête réseau).
+5.  **Configuration "In-Page"** : Modifiez vos fournisseurs et vos blocs directement depuis la page où vous êtes, sans ouvrir les machins complexes de Chrome.
+6.  **Multi-support** : Fonctionne sur les `input`, `textarea`, et les éditeurs complexes comme ceux de LinkedIn ou Gmail.
+7.  **100% Français** : L'interface est entièrement en français par défaut.
 
-## Architecture
+## 📥 Installation
 
-The project is structured into three main parts:
+### Depuis les sources (Développement)
 
-1.  **Content Script** (`src/content/`):
-    - Injected into web pages.
-    - `InputManager.ts`: Handles reading/writing to standard inputs, contenteditable divs, and complex editors like LinkedIn.
-    - `ContentApp.tsx`: The React UI injected into the page (AI button/badge).
-    - `index.tsx`: Entry point for the content script.
+1.  **Pré-requis** : Avoir [Node.js](https://nodejs.org/) installé.
+2.  **Télécharger le code** : Clonez ce dépôt ou téléchargez les fichiers.
+3.  **Installer les dépendances** :
+    ```bash
+    npm install
+    ```
+4.  **Construire l'extension** :
+    ```bash
+    npm run build
+    ```
+    Cela va créer un dossier `dist`.
+5.  **Charger dans Chrome** :
+    *   Ouvrez Chrome et allez sur `chrome://extensions`.
+    *   Activez le **Mode développeur** (en haut à droite).
+    *   Cliquez sur **Charger l'extension non empaquetée**.
+    *   Sélectionnez le dossier `dist`.
 
-2.  **Options Page** (`src/options/`):
-    - The configuration dashboard.
-    - Allows users to manage providers, prompt blocks, and global settings using `chrome.storage.sync`.
+## 📖 Utilisation
 
-3.  **Background Service Worker** (`src/background/`):
-    - Handles API calls to avoid CORS issues in content scripts.
-    - Relays messages between Content Script and APIs.
+### 1. L'Interface Ruban
+Sur n'importe quelle page web contenant un champ de texte :
+*   Cliquez dans le champ pour le rendre actif.
+*   Un petit bouton (✨) apparaît à proximité (souvent en haut à droite du champ).
+*   **Survolez** ce bouton pour dérouler le ruban :
+    *   ⚙️ **Paramètres** : Ouvre le panneau de configuration.
+    *   🔌 **IA ON/IA OFF** : Active ou désactive l'appel à l'IA.
 
-4.  **Utilities** (`src/utils/`):
-    - `storage.ts`: Type definitions and helpers for Chrome Storage.
-    - `ai-api.ts`: Logic to dispatch API calls to the correct provider (Ollama, Gemini, OpenAI-compatible).
+### 2. Le Système de Blocs (Shortcuts)
+Les blocs vous permettent d'insérer du texte statique rapidement.
+*   Format : `[CATEGORIE_SOUSCLE]`
+*   **Exemples** :
+    *   `[LM]` : Insère une Lettre de Motivation (si configuré).
+    *   `[CV_France]` : Insère votre CV version France.
+    *   `[CV_Canada]` : Insère votre CV version Canada.
 
-## Key Files & Customization
+**Comment les créer ?**
+1.  Cliquez sur l'icône ⚙️ (Paramètres) dans le ruban.
+2.  Allez dans l'onglet **Blocs de Prompts**.
+3.  Cliquez sur **Ajouter un Bloc**.
+4.  Remplissez :
+    *   **Catégorie** : Le groupe principal (ex: `CV`).
+    *   **Sous-clé** : La spécificité (ex: `France`). *Laisser vide si pas de sous-catégorie.*
+    *   **Contenu** : Le texte à insérer.
+5.  Sauvegardez.
+6.  Dans un champ, tapez `[CV_France]` puis cliquez sur le bouton ✨. Le texte se remplace instantanément.
 
-### 1. Adding/Modifying AI Providers
-- **File**: `src/utils/ai-api.ts`
-- **Logic**: The `callAI` function determines which strategy to use based on the provider ID or Base URL.
-- **To Add**: If you need a completely new authentication scheme (e.g., OAuth flow or weird headers), add a new strategy function here and call it in `callAI`.
+### 3. L'Intelligence Artificielle (IA)
+Si le mode IA est sur **ON** :
+1.  Tapez une consigne dans le champ (ex: "Rédige un email de remerciement pour un entretien").
+2.  Cliquez sur le bouton ✨.
+3.  L'extension envoie votre texte à l'IA configurée (ex: Gemini, Ollama) et remplace votre consigne par la réponse.
 
-### 2. Input Handling (LinkedIn, etc.)
-- **File**: `src/content/InputManager.ts`
-- **Logic**: Abstract class with `getValue` and `setValue`.
-- **To Add**: If you encounter a website where text insertion fails (e.g., custom canvas editors or complex iFrames), add a specific check in `InputManager` to handle that DOM structure.
+## ⚙️ Configuration des Fournisseurs IA
 
-### 3. Configuration Schema
-- **File**: `src/utils/storage.ts`
-- **Logic**: Defines `AppSettings` interface.
-- **To Add**: If you want to add a new global setting (e.g., "darkMode"), add it to the interface and `defaultSettings` here, then expose it in `Options.tsx`.
+Dans le panneau de paramètres (⚙️), onglet **Fournisseurs IA** :
+*   **Ollama (Local)** : Idéal pour la confidentialité. Assurez-vous de lancer Ollama avec `OLLAMA_ORIGINS="*" ollama serve` pour autoriser l'extension à lui parler.
+*   **Gemini / OpenAI / Claude** : Entrez simplement votre clé API.
+*   **Activer/Désactiver** : Cochez la case à droite d'un fournisseur pour l'activer. Le premier fournisseur activé sera utilisé.
 
-## Build & Development
+## 👨‍💻 Structure du Code (Pour les curieux)
 
-### Commands
+Le code est commenté en français simple. Voici les fichiers clés :
 
-- **Install Dependencies**:
-  ```bash
-  npm install
-  ```
+*   `src/content/ContentApp.tsx` : C'est le cœur de l'interface qui s'affiche sur les pages web (le bouton, le ruban).
+*   `src/content/SettingsPanel.tsx` : Le code du panneau de configuration qui s'ouvre par-dessus la page.
+*   `src/content/InputManager.ts` : Une classe intelligente qui sait comment lire et écrire du texte dans les champs complexes (comme LinkedIn qui n'utilise pas de simples `texarea`).
+*   `src/background/index.ts` : Le chef d'orchestre invisible qui fait les appels vers l'extérieur (les API IA) pour contourner les restrictions de sécurité des navigateurs.
+*   `src/utils/ai-api.ts` : La bibliothèque qui sait parler aux différentes IA (Gemini, ChatGPT, etc.).
 
-- **Dev Mode (Hot Reload)**:
-  ```bash
-  npm run dev
-  ```
-  *Note: You need to load the `dist` folder in Chrome Extensions (Developer Mode).*
-
-- **Production Build**:
-  ```bash
-  npm run build
-  ```
-  *Use this for publishing or final testing.*
-
-### Loading in Chrome
-
-1.  Go to `chrome://extensions`.
-2.  Enable "Developer mode".
-3.  Click "Load unpacked".
-4.  Select the `dist` folder generated by the build.
-
-## How to Edit "Prompt Blocks"
-
-Prompt blocks are JSON objects stored in your settings.
-**Example**:
-```json
-{
-  "CV": { 
-     "CV1": "Make me a CV...",
-     "CV2": "Make me a French CV..."
-  },
-  "LM": "Write a cover letter..."
-}
-```
-- Typing `[CV_CV1]` expands to the first prompt.
-- Typing `[LM]` expands to the second.
-
-## Troubleshooting
-
-- **Ollama 403 Forbidden**:
-  If using Ollama locally, you must allow browser origins:
-  ```bash
-  OLLAMA_ORIGINS="*" ollama serve
-  ```
+---
+**Auteur** : King Rahman
