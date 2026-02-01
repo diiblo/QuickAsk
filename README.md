@@ -1,6 +1,6 @@
 # QuickAsk - Assistant IA & Blocs de Texte
 
-QuickAsk (par **King Rahman**) est une extension Chrome puissante qui transforme la manière dont vous interagissez avec les champs de texte sur le web. Elle combine l'intelligence artificielle (IA) pour générer du contenu et un système de blocs de texte (raccourcis) pour l'automatisation.
+QuickAsk est une extension Chrome puissante qui transforme la manière dont vous interagissez avec les champs de texte sur le web. Elle combine l'intelligence artificielle (IA) pour générer du contenu et un système de blocs de texte (raccourcis) pour l'automatisation.
 
 ## 🚀 Fonctionnalités Principales
 
